@@ -101,12 +101,16 @@ def bnr():
 def dariknews():
     # dariknews.bg
     global paragraph, link, date, title, label
+    # print(title)
     everythin = soup.find("main", attrs={'class': 'page dk-article'})
     paragraph = everythin.findChild("div", attrs={'class': 'article-text-inner-wrapper io-article-body'}).text.strip()
-    paragraph = paragraph.replace('\n', ' ')
+    # print('do we come here?')
+    paragraph = paragraph.replace('\n', '').replace('\r\n','').replace('\r','')
     paragraph = paragraph.replace('"', '')
+    # string = "a\nb\rv"
+    # paragraph = " ".join(string.splitlines())
     link = url
-    title = everythin.find('h1', attrs={'class': "article-title"}).text.strip()
+    title = everythin.find('h1', attrs={'class': "article-title", 'itemprop':'name'}).text.strip()
     date = everythin.find('time', attrs={'class': "time-stamp"})['datetime'][:10]  # cutting off the timestamp
     date = datetime.datetime.strptime(date, '%Y-%m-%d').strftime('%d.%m.%y')  # reformatting the date
     label = '0'
@@ -202,17 +206,18 @@ upperframe = []
 # for line in text_file:
 #     lines.append(line.replace('\n', ''))
 
-filename = "NEWS_DW.csv"
+filename = "NEWS_tbt.csv"
 f = open(filename, "w", encoding='utf-8')
 headers = "Title,Article,Date,URL,Label"
 f.write(headers + '\n')
 
-path = '/Users/nataliazheleva/PycharmProjects/thesis/text_files/'
+path = '/Users/nataliazheleva/PycharmProjects/thesis/text_files2/'
 text_files = os.listdir(path)
 
 for text_file in text_files:
     file_urls = open(path + text_file, 'r')
     for url in file_urls:
+        url = url.strip('\n')
         try:
             page = requests.get(url, headers=headers_url)  # this might throw an exception if something goes wrong.
 
@@ -221,6 +226,7 @@ for text_file in text_files:
             continue  # ignore this page. Abandon this and go back.
         time.sleep(2)
         soup = BeautifulSoup(page.text, 'html.parser')
+        # print(soup)
         frame = []
         try:
             mapper[text_file]()
@@ -228,16 +234,16 @@ for text_file in text_files:
             pass
 
         if not title:
-            print(url + 'has no title')
+            # print(url + 'has no title')
             pass
         if not date:
-            print(url + 'has no date')
+            # print(url + 'has no date')
             pass
         if not paragraph:
-            print(url + 'has no paragraph')
+            # print(url + 'has no paragraph')
             pass
         if not label:
-            print(url + 'has no label')
+            # print(url + 'has no label')
             pass
         frame.append((title, paragraph, date, link, label))
         f.write(
